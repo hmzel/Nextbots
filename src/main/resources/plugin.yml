@@ -4,3 +4,6 @@ main: me.zelha.nextbots.Main
 api-version: 1.8.8
 authors: [ hmzel ]
 description: Nextbots in minecraft
+commands:
+  nextbot:
+    usage: /<command>

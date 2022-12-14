@@ -71,5 +71,10 @@
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>hm.zelha</groupId>
+            <artifactId>ParticleSFX</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 </project>
