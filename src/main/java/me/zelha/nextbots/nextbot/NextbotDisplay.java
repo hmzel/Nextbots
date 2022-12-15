@@ -39,6 +39,10 @@ public class NextbotDisplay extends ParticleImage {
 
             face(location);
 
+            if (rot.getPitch() > -90) {
+                rot.setPitch(-90);
+            }
+
             main:
             for (int i = 0; i < particleFrequency; i++) {
                 ColorableParticle particle = (ColorableParticle) getCurrentParticle();
