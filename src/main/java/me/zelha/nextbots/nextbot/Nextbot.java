@@ -26,6 +26,7 @@ public class Nextbot extends EntityZombie {
     public Nextbot(LocationSafe center, Object obj) {
         super(((CraftWorld) center.getWorld()).getHandle());
 
+        Main.registerBot(this);
         setPosition(center.getX(), center.getY(), center.getZ());
 
         if (obj instanceof File) {
@@ -90,6 +91,7 @@ public class Nextbot extends EntityZombie {
     }
 
     public void despawn() {
+        Main.unregisterBot(this);
         display.stop();
         animator.cancel();
         die();
