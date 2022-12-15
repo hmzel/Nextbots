@@ -92,6 +92,7 @@ public class Nextbot extends EntityZombie {
     public void despawn() {
         display.stop();
         animator.cancel();
+        die();
     }
 
     @Override
@@ -117,11 +118,12 @@ public class Nextbot extends EntityZombie {
     }
 
     @Override
-    public void die() {
+    public void makeSound(String s, float f, float f1) {
     }
 
     @Override
-    public void makeSound(String s, float f, float f1) {
+    public boolean damageEntity(DamageSource damagesource, float f) {
+        return false;
     }
 
     private Object getPrivateField(String fieldName, Class clazz, Object object) {
