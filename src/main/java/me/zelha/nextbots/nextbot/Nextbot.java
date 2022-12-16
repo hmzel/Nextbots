@@ -6,8 +6,10 @@ import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.potion.PotionEffectType;
@@ -22,6 +24,7 @@ import java.util.Map;
 public class Nextbot extends EntityZombie {
 
     private final NextbotDisplay display;
+    private final ItemStack kbItem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.STICK));
     private BukkitTask animator = null;
     int hasntMoved = 0;
     int flyingMenacingly = 0;
@@ -58,6 +61,8 @@ public class Nextbot extends EntityZombie {
         ((Map) getPrivateField("d", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, "Nextbot");
         ((Map) getPrivateField("f", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, 54);
         addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
+        getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(13131313);
+        kbItem.addEnchantment(Enchantment.KNOCKBACK, 127);
         ((CraftWorld) center.getWorld()).getHandle().addEntity(this);
 
         startAI();
@@ -273,6 +278,11 @@ public class Nextbot extends EntityZombie {
         hasntMoved = 0;
 
         return super.r(entity);
+    }
+
+    @Override
+    public ItemStack bA() {
+        return kbItem;
     }
 
     @Override
