@@ -95,6 +95,9 @@ public class Nextbot extends EntityZombie {
         display.stop();
         animator.cancel();
         die();
+        setHealth(0);
+
+        deathTicks = 100;
     }
 
     @Override
