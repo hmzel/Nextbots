@@ -22,6 +22,8 @@ public class Nextbot extends EntityZombie {
 
     private final NextbotDisplay display;
     private BukkitTask animator = null;
+    int hasntMoved = 0;
+    int flyingMenacingly = 10;
 
     public Nextbot(LocationSafe center, Object obj) {
         super(((CraftWorld) center.getWorld()).getHandle());
@@ -112,6 +114,45 @@ public class Nextbot extends EntityZombie {
         super.t_();
         super.t_();
         super.t_();
+
+        if (getGoalTarget() != null && this.locX == this.lastX && this.locZ == this.lastZ) {
+            hasntMoved++;
+        }
+
+        if (getGoalTarget() != null && hasntMoved >= 80) {
+            if (flyingMenacingly >= 80) {
+                flyingMenacingly = 0;
+                hasntMoved = 0;
+
+                return;
+            }
+
+            double motX = getGoalTarget().locX - this.locX;
+            double motY = getGoalTarget().locY - this.locY;
+            double motZ = getGoalTarget().locZ - this.locZ;
+
+            if (motX > 0) {
+                motX = Math.min(motX, 1);
+            } else {
+                motX = Math.max(motX, -1);
+            }
+
+            if (motY > 0) {
+                motY = Math.min(motY, 2);
+            } else {
+                motY = Math.max(motY, -2);
+            }
+
+            if (motZ > 0) {
+                motZ = Math.min(motZ, 1);
+            } else {
+                motZ = Math.max(motZ, -1);
+            }
+
+            move(motX, motY, motZ);
+
+            flyingMenacingly++;
+        }
     }
 
     @Override
@@ -179,8 +220,8 @@ public class Nextbot extends EntityZombie {
                     this.motZ = MathHelper.a(this.motZ, -f4, f4);
                     this.fallDistance = 0.0F;
 
-                    if (this.motY < -0.15D) {
-                        this.motY = -0.15D;
+                    if (this.motY < -0.015D) {
+                        this.motY = -0.015D;
                     }
 
                     boolean flag = this.isSneaking();
@@ -197,14 +238,14 @@ public class Nextbot extends EntityZombie {
                 }
 
                 if (!this.world.isClientSide || this.world.isLoaded(new BlockPosition((int) this.locX, 0, (int) this.locZ)) && this.world.getChunkAtWorldCoords(new BlockPosition((int) this.locX, 0, (int) this.locZ)).o()) {
-                    this.motY -= 0.08D;
+                    this.motY -= 0.008D;
                 } else if (this.locY > 0.0D) {
-                    this.motY = -0.1D;
+                    this.motY = -0.01D;
                 } else {
                     this.motY = 0.0D;
                 }
 
-                this.motY *= 0.9800000190734863D;
+                this.motY *= 0.9200000190734863D;
                 this.motX *= f5;
                 this.motZ *= f5;
             }
@@ -221,6 +262,14 @@ public class Nextbot extends EntityZombie {
 
         this.aB += (f2 - this.aB) * 0.4F;
         this.aC += this.aB;
+    }
+
+    @Override
+    public boolean r(Entity entity) {
+        flyingMenacingly = 0;
+        hasntMoved = 0;
+
+        return super.r(entity);
     }
 
     @Override
