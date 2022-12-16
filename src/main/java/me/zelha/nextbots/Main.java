@@ -13,12 +13,13 @@ import java.util.List;
 
 public final class Main extends JavaPlugin {
 
+    private static final List<Nextbot> bots = new ArrayList<>();
     private static Main instance;
-    private static List<Nextbot> bots = new ArrayList<>();
 
     @Override
     public void onEnable() {
         ParticleSFXMain.setPlugin(this);
+        Bukkit.getPluginManager().registerEvents(new ChunkUnloadPrevention(), this);
         getCommand("nextbot").setExecutor(new NextbotCommand());
 
         instance = this;
@@ -33,15 +34,19 @@ public final class Main extends JavaPlugin {
         }
     }
 
-    public static Main getInstance() {
-        return instance;
-    }
-
     public static void registerBot(Nextbot bot) {
         bots.add(bot);
     }
 
     public static void unregisterBot(Nextbot bot) {
         bots.remove(bot);
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
+
+    public static List<Nextbot> getBots() {
+        return bots;
     }
 }
