@@ -10,6 +10,7 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -23,7 +24,7 @@ public class Nextbot extends EntityZombie {
     private final NextbotDisplay display;
     private BukkitTask animator = null;
     int hasntMoved = 0;
-    int flyingMenacingly = 10;
+    int flyingMenacingly = 0;
 
     public Nextbot(LocationSafe center, Object obj) {
         super(((CraftWorld) center.getWorld()).getHandle());
@@ -56,6 +57,7 @@ public class Nextbot extends EntityZombie {
         ((Map) getPrivateField("c", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put("Nextbot", Nextbot.class);
         ((Map) getPrivateField("d", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, "Nextbot");
         ((Map) getPrivateField("f", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, 54);
+        addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
         ((CraftWorld) center.getWorld()).getHandle().addEntity(this);
 
         startAI();
@@ -69,6 +71,7 @@ public class Nextbot extends EntityZombie {
                 Player nearest = null;
                 double dist = Double.MAX_VALUE;
 
+                addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
                 center.setX(Nextbot.this.locX);
                 center.setY(Nextbot.this.locY + (Nextbot.this.length / 2) + (display.getXRadius() / 2));
                 center.setZ(Nextbot.this.locZ);
