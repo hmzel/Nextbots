@@ -115,6 +115,115 @@ public class Nextbot extends EntityZombie {
     }
 
     @Override
+    public boolean V() {
+        if (getGoalTarget() == null) return inWater;
+
+        if (getGoalTarget().locY <= this.locY
+           && getGoalTarget().locX - 1 < this.locX
+           && getGoalTarget().locX + 1 > this.locX
+           && getGoalTarget().locZ - 1 < this.locZ
+           && getGoalTarget().locZ + 1 > this.locZ) return false;
+
+        return inWater;
+    }
+
+    @Override
+    public void g(float f, float f1) {
+        double d0 = this.locY;
+        float f3;
+        float f4;
+
+        if (this.bM()) {
+            if (this.V() || this.ab()) {
+                f3 = 0.8F;
+                f4 = 0.02F;
+                f3 += (0.54600006F - f3) * 2.5F / 3.0F;
+                f4 += (this.bI() - f4) * 2.5F / 3.0F;
+
+                this.a(f, f1, f4);
+                this.move(this.motX, this.motY, this.motZ);
+                this.motX *= f3;
+                this.motY *= 0.800000011920929D;
+                this.motZ *= f3;
+                this.motY -= 0.02D;
+
+                if (this.positionChanged && this.c(this.motX, this.motY + 0.6000000238418579D - this.locY + d0, this.motZ)) {
+                    this.motY = 0.30000001192092896D;
+                }
+            } else {
+                float f5 = 0.91F;
+
+                if (this.onGround) {
+                    f5 = this.world.getType(new BlockPosition(MathHelper.floor(this.locX), MathHelper.floor(this.getBoundingBox().b) - 1, MathHelper.floor(this.locZ))).getBlock().frictionFactor * 0.91F;
+                }
+
+                float f6 = 0.16277136F / (f5 * f5 * f5);
+
+                if (this.onGround) {
+                    f3 = this.bI() * f6;
+                } else {
+                    f3 = this.aM;
+                }
+
+                this.a(f, f1, f3);
+
+                f5 = 0.91F;
+
+                if (this.onGround) {
+                    f5 = this.world.getType(new BlockPosition(MathHelper.floor(this.locX), MathHelper.floor(this.getBoundingBox().b) - 1, MathHelper.floor(this.locZ))).getBlock().frictionFactor * 0.91F;
+                }
+
+                if (this.k_()) {
+                    f4 = 0.15F;
+                    this.motX = MathHelper.a(this.motX, -f4, f4);
+                    this.motZ = MathHelper.a(this.motZ, -f4, f4);
+                    this.fallDistance = 0.0F;
+
+                    if (this.motY < -0.15D) {
+                        this.motY = -0.15D;
+                    }
+
+                    boolean flag = this.isSneaking();
+
+                    if (flag && this.motY < 0.0D) {
+                        this.motY = 0.0D;
+                    }
+                }
+
+                this.move(this.motX, this.motY, this.motZ);
+
+                if (this.positionChanged && this.k_()) {
+                    this.motY = 0.2D;
+                }
+
+                if (!this.world.isClientSide || this.world.isLoaded(new BlockPosition((int) this.locX, 0, (int) this.locZ)) && this.world.getChunkAtWorldCoords(new BlockPosition((int) this.locX, 0, (int) this.locZ)).o()) {
+                    this.motY -= 0.08D;
+                } else if (this.locY > 0.0D) {
+                    this.motY = -0.1D;
+                } else {
+                    this.motY = 0.0D;
+                }
+
+                this.motY *= 0.9800000190734863D;
+                this.motX *= f5;
+                this.motZ *= f5;
+            }
+        }
+
+        this.aA = this.aB;
+        d0 = this.locX - this.lastX;
+        double d1 = this.locZ - this.lastZ;
+        float f2 = MathHelper.sqrt(d0 * d0 + d1 * d1) * 4.0F;
+
+        if (f2 > 1.0F) {
+            f2 = 1.0F;
+        }
+
+        this.aB += (f2 - this.aB) * 0.4F;
+        this.aC += this.aB;
+    }
+
+    @Override
     public void a(boolean flag) {
     }
 
