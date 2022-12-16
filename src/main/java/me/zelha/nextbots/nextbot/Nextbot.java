@@ -119,7 +119,7 @@ public class Nextbot extends EntityZombie {
             hasntMoved++;
         }
 
-        if (getGoalTarget() != null && hasntMoved >= 80) {
+        if (getGoalTarget() != null && hasntMoved >= 300) {
             if (flyingMenacingly >= 80) {
                 flyingMenacingly = 0;
                 hasntMoved = 0;
