@@ -39,7 +39,7 @@ public class NextbotDisplay extends ParticleImage {
 
             face(location);
 
-            if (rot.getPitch() > -90) {
+            if (rot.getPitch() > -90 && rot.getPitch() < -130) {
                 rot.setPitch(-90);
             }
 
