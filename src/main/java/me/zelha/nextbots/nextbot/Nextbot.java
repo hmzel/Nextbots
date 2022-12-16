@@ -29,7 +29,7 @@ public class Nextbot extends EntityZombie {
     int hasntMoved = 0;
     int flyingMenacingly = 0;
 
-    public Nextbot(LocationSafe center, Object obj) {
+    public Nextbot(LocationSafe center, Object obj, String name) {
         super(((CraftWorld) center.getWorld()).getHandle());
 
         Main.registerBot(this);
@@ -60,6 +60,7 @@ public class Nextbot extends EntityZombie {
         ((Map) getPrivateField("c", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put("Nextbot", Nextbot.class);
         ((Map) getPrivateField("d", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, "Nextbot");
         ((Map) getPrivateField("f", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, 54);
+        setCustomName(name);
         addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
         getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(13131313);
         kbItem.addEnchantment(Enchantment.KNOCKBACK, 127);
