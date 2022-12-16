@@ -20,9 +20,11 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Nextbot extends EntityZombie {
 
+    private final ThreadLocalRandom rng = ThreadLocalRandom.current();
     private final NextbotDisplay display;
     private final ItemStack kbItem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.STICK));
     private BukkitTask animator = null;
@@ -129,7 +131,7 @@ public class Nextbot extends EntityZombie {
         }
 
         if (getGoalTarget() != null && hasntMoved >= 300) {
-            if (flyingMenacingly >= 80) {
+            if (flyingMenacingly >= 100) {
                 flyingMenacingly = 0;
                 hasntMoved = 0;
 
@@ -156,6 +158,11 @@ public class Nextbot extends EntityZombie {
                 motZ = Math.min(motZ, 1);
             } else {
                 motZ = Math.max(motZ, -1);
+            }
+
+            if (rng.nextInt(5) == 0) {
+                motX = rng.nextInt(2) - 1;
+                motZ = rng.nextInt(2) - 1;
             }
 
             move(motX, motY, motZ);
