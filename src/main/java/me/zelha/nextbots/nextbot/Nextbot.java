@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -26,10 +27,13 @@ public class Nextbot extends EntityZombie {
 
     private final ThreadLocalRandom rng = ThreadLocalRandom.current();
     private final NextbotDisplay display;
+    private final Location lHelper;
     private final ItemStack kbItem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.STICK));
     private BukkitTask animator = null;
     int hasntMoved = 0;
     int flyingMenacingly = 0;
+    int angry = 0;
+    int calm = 0;
 
     public Nextbot(LocationSafe center, Object obj, String name) {
         super(((CraftWorld) center.getWorld()).getHandle());
@@ -43,6 +47,7 @@ public class Nextbot extends EntityZombie {
             display = new NextbotDisplay(center, (String) obj);
         }
 
+        lHelper = display.getCenter().clone();
         persistent = true;
         canPickUpLoot = false;
         List goalB = (List) getPrivateField("b", PathfinderGoalSelector.class, goalSelector);
@@ -128,12 +133,21 @@ public class Nextbot extends EntityZombie {
 
         if (getGoalTarget() != null && this.locX == this.lastX && this.locZ == this.lastZ) {
             hasntMoved++;
+        } else if (flyingMenacingly == 0) {
+            hasntMoved = 0;
+            calm++;
+        }
+
+        if (calm >= 30) {
+            angry = 0;
         }
 
         if (getGoalTarget() != null && hasntMoved >= 300) {
-            if (flyingMenacingly >= 100) {
+            if (flyingMenacingly >= 100 && angry < 3) {
                 flyingMenacingly = 0;
                 hasntMoved = 0;
+                calm = 0;
+                angry++;
 
                 return;
             }
@@ -167,8 +181,43 @@ public class Nextbot extends EntityZombie {
 
             move(motX, motY, motZ);
 
+            for (org.bukkit.entity.Entity entity : getWorld().getWorld().getNearbyEntities(lHelper.zero().add(locX, locY, locZ), width, length, width)) {
+                if (!(entity instanceof Player)) continue;
+
+                if (((CraftPlayer) entity).getHandle().damageEntity(DamageSource.mobAttack(this), 13131313)) {
+                    flyingMenacingly = 0;
+                    hasntMoved = 0;
+                    calm = 0;
+                    angry = 0;
+
+                    return;
+                }
+            }
+
             flyingMenacingly++;
         }
+    }
+
+    @Override
+    public void move(double d0, double d1, double d2) {
+        if (angry >= 3 && flyingMenacingly > 0) {
+            for (int x = (int) display.getXRadius(); x >= (int) -display.getXRadius(); x--) {
+                for (int y = (int) display.getZRadius(); y >= (int) -display.getZRadius(); y--) {
+                    for (int z = (int) display.getXRadius(); z >= (int) -display.getXRadius(); z--) {
+                        Block block = lHelper.zero().add(display.getCenter()).add(x, y, z).getBlock();
+
+                        if (block.getType() == Material.AIR) continue;
+
+                        String breakSound = world.getType(new BlockPosition(lHelper.getBlockX(), lHelper.getBlockY(), lHelper.getBlockZ())).getBlock().stepSound.getBreakSound();
+
+                        block.breakNaturally();
+                        world.makeSound(lHelper.getX(), lHelper.getY(), lHelper.getZ(), breakSound, 2.5f, 1);
+                    }
+                }
+            }
+        }
+
+        super.move(d0, d1, d2);
     }
 
     @Override
@@ -284,6 +333,8 @@ public class Nextbot extends EntityZombie {
     public boolean r(Entity entity) {
         flyingMenacingly = 0;
         hasntMoved = 0;
+        calm = 0;
+        angry = 0;
 
         return super.r(entity);
     }
