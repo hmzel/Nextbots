@@ -1,10 +1,12 @@
 package me.zelha.nextbots;
 
+import me.zelha.nextbots.commands.CreateCommand;
 import me.zelha.nextbots.commands.HelpCommand;
 import me.zelha.nextbots.commands.NextbotCommand;
 
 public enum NextbotSubCommands {
-    HELP(new HelpCommand());
+    HELP(new HelpCommand()),
+    CREATE(new CreateCommand());
 
     private final NextbotCommand command;
 

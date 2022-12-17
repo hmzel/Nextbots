@@ -31,7 +31,8 @@ public class NextbotCommand implements CommandExecutor {
     public void help(CommandSender sender) {
         sender.sendMessage(
                 "§7-------------------- [ §cNextbots §7] --------------------\n" +
-                "§7- §c/Nextbot help <command> §f- §7Displays this, or the usage of a command."
+                "§7- §c/Nextbot help <command> §f- §7Displays this, or the usage of a command.\n" +
+                "§7- §c/Nextbot create <name> §f- §7Creates a nextbot with the given name."
         );
     }
 }
