@@ -11,7 +11,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 
-public class ImageLinkCommand extends NextbotCommand {
+public class ImageFileCommand extends NextbotCommand {
 
     private final File dataFolder = Main.getInstance().getDataFolder();
 
@@ -24,6 +24,7 @@ public class ImageLinkCommand extends NextbotCommand {
         }
 
         File configFile = new File(dataFolder, args[1] + ".yml");
+        File imageFile = new File(args[2]);
 
         if (!configFile.exists()) {
             sender.sendMessage("§cNextbot " + args[1] + " doesn't exist!");
@@ -31,10 +32,16 @@ public class ImageLinkCommand extends NextbotCommand {
             return true;
         }
 
+        if (!imageFile.exists()) {
+            sender.sendMessage("§cThere is no file at " + args[2] + " !");
+
+            return true;
+        }
+
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
-        config.set("imageLink", args[2]);
-        config.set("imageFile", "");
+        config.set("imageFile", args[2]);
+        config.set("imageLink", "");
 
         try {
             config.save(configFile);
@@ -54,7 +61,7 @@ public class ImageLinkCommand extends NextbotCommand {
                 display.removeFrame(0);
             }
 
-            display.addImage(args[2]);
+            display.addImage(imageFile);
         }
 
         sender.sendMessage("§cSet " + args[1] + "'s image to " + args[2]);
@@ -66,9 +73,9 @@ public class ImageLinkCommand extends NextbotCommand {
     public void help(CommandSender sender) {
         sender.sendMessage(
                 "§7-------------------- [ §cNextbots §7] --------------------\n" +
-                "§c/Nextbot imagelink <name> <link>\n" +
-                "§7Sets what link the nextbot will get it's image from. can be jpg, png, gif, etc.\n" +
-                "§7ex: §c/nextbot imagelink bot https://media.tenor.com/b8Pf3bbUYfAAAAAC/faith-new-blood.gif"
+                "§c/Nextbot imagefile <name> <path>\n" +
+                "§7Sets what file the nextbot will get it's image from. can be jpg, png, gif, etc.\n" +
+                "§7ex: §c/nextbot imagefile bot plugins/Nextbots/quack.gif"
         );
     }
 }
