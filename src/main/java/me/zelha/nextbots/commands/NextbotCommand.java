@@ -49,7 +49,8 @@ public class NextbotCommand implements CommandExecutor {
                 "§7- §c/Nextbot remove <name> §f- §7Removes the nextbot with the given name.\n" +
                 "§7- §c/Nextbot imagelink <name> <link> §f- §7Sets the link that the given nextbot will get it's image from.\n" +
                 "§7- §c/Nextbot imagefile <name> <path> §f- §7Sets the file that the given nextbot will get it's image from.\n" +
-                "§7- §c/Nextbot particle <name> <number> §f- §7Sets the amount of particles the given nextbot will send per tick"
+                "§7- §c/Nextbot particle <name> <number> §f- §7Sets the amount of particles the given nextbot will send per tick.\n" +
+                "§7- §c/Nextbot size <name> <number> §f- §7Sets the size of the given nextbot based on it's aspect ratio."
         );
     }
 

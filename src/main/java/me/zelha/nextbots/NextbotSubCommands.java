@@ -10,7 +10,8 @@ public enum NextbotSubCommands {
     REMOVE(new RemoveCommand()),
     IMAGELINK(new ImageLinkCommand()),
     IMAGEFILE(new ImageFileCommand()),
-    PARTICLE(new ParticleCommand());
+    PARTICLE(new ParticleCommand()),
+    SIZE(new SizeCommand());
 
     private final NextbotCommand command;
 
