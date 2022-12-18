@@ -73,10 +73,10 @@ public class Nextbot extends EntityZombie {
         kbItem.addEnchantment(Enchantment.KNOCKBACK, 127);
         ((CraftWorld) center.getWorld()).getHandle().addEntity(this);
 
-        startAI();
+        start();
     }
 
-    public void startAI() {
+    public void start() {
         animator = new BukkitRunnable() {
             @Override
             public void run() {
@@ -86,7 +86,7 @@ public class Nextbot extends EntityZombie {
 
                 addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
                 center.setX(Nextbot.this.locX);
-                center.setY(Nextbot.this.locY + (Nextbot.this.length / 2) + (display.getXRadius() / 2));
+                center.setY(Nextbot.this.locY + (Nextbot.this.length / 2) + (display.getZRadius() / 2));
                 center.setZ(Nextbot.this.locZ);
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
