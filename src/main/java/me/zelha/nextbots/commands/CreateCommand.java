@@ -47,8 +47,8 @@ public class CreateCommand extends NextbotCommand {
         config.set("imageLink", "");
         config.set("imageFile", "");
         config.set("particles", 2000);
-        config.set("xRadius", 0);
-        config.set("zRadius", 0);
+        config.set("width", 0);
+        config.set("height", 0);
         config.set("frameDelay", 0);
         config.set("fuzz", 0);
         config.createSection("ignoredColors");

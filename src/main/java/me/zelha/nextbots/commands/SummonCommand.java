@@ -45,8 +45,8 @@ public class SummonCommand extends NextbotCommand {
         String imageLink = config.getString("imageLink");
         String imageFile = config.getString("imageFile");
         int particles = config.getInt("particles");
-        int xRadius = config.getInt("xRadius");
-        int zRadius = config.getInt("zRadius");
+        int width = config.getInt("width");
+        int height = config.getInt("height");
         int frameDelay = config.getInt("frameDelay");
         int fuzz = config.getInt("fuzz");
         ConfigurationSection ignoredColors = config.getConfigurationSection("ignoredColors");
@@ -70,13 +70,13 @@ public class SummonCommand extends NextbotCommand {
 
         display.setParticleFrequency(particles);
 
-        if (xRadius == 0 && zRadius == 0) {
-            config.set("xRadius", display.getXRadius());
-            config.set("zRadius", display.getZRadius());
+        if (width == 0 && height == 0) {
+            config.set("width", display.getXRadius());
+            config.set("height", display.getZRadius());
             save(config, args[1], sender);
         } else {
-            display.setXRadius(xRadius);
-            display.setZRadius(zRadius);
+            display.setXRadius(width);
+            display.setZRadius(height);
         }
 
         display.setFrameDelay(frameDelay);
