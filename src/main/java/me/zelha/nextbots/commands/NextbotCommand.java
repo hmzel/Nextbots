@@ -33,7 +33,8 @@ public class NextbotCommand implements CommandExecutor {
                 "§7-------------------- [ §cNextbots §7] --------------------\n" +
                 "§7- §c/Nextbot help <command> §f- §7Displays this, or the usage of a command.\n" +
                 "§7- §c/Nextbot create <name> §f- §7Creates a nextbot with the given name.\n" +
-                "§7- §c/Nextbot list §f- §7Lists all existing nextbots"
+                "§7- §c/Nextbot list §f- §7Lists all existing nextbots.\n" +
+                "§7- §c/Nextbot remove <name> §f- §7Removes the nextbot with the given name."
         );
     }
 }
