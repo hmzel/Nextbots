@@ -361,6 +361,10 @@ public class Nextbot extends EntityZombie {
         return false;
     }
 
+    public NextbotDisplay getDisplay() {
+        return display;
+    }
+
     private Object getPrivateField(String fieldName, Class clazz, Object object) {
         try {
             Field field = clazz.getDeclaredField(fieldName);
