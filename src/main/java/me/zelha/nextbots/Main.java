@@ -1,13 +1,12 @@
 package me.zelha.nextbots;
 
 import hm.zelha.particlesfx.ParticleSFXMain;
-import hm.zelha.particlesfx.util.LocationSafe;
 import me.zelha.nextbots.commands.NextbotCommand;
+import me.zelha.nextbots.nextbot.ChunkUnloadPrevention;
 import me.zelha.nextbots.nextbot.Nextbot;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +17,11 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        instance = this;
+
         ParticleSFXMain.setPlugin(this);
         Bukkit.getPluginManager().registerEvents(new ChunkUnloadPrevention(), this);
         getCommand("nextbot").setExecutor(new NextbotCommand());
-
-        instance = this;
-
-        new Nextbot(new LocationSafe(Bukkit.getPlayer("hmzel").getLocation()), new File("maxwell.gif"));
     }
 
     @Override
