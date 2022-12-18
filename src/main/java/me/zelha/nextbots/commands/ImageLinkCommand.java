@@ -1,20 +1,10 @@
 package me.zelha.nextbots.commands;
 
-import me.zelha.nextbots.Main;
-import me.zelha.nextbots.nextbot.Nextbot;
-import me.zelha.nextbots.nextbot.NextbotDisplay;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
-import java.io.IOException;
 
 public class ImageLinkCommand extends NextbotCommand {
-
-    private final File dataFolder = Main.getInstance().getDataFolder();
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length <= 2) {
@@ -23,39 +13,22 @@ public class ImageLinkCommand extends NextbotCommand {
             return true;
         }
 
-        File configFile = new File(dataFolder, args[1] + ".yml");
+        FileConfiguration config = getConfig(args[1], sender);
 
-        if (!configFile.exists()) {
-            sender.sendMessage("§cNextbot " + args[1] + " doesn't exist!");
-
-            return true;
-        }
-
-        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        if (config == null) return true;
 
         config.set("imageLink", args[2]);
         config.set("imageFile", "");
 
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            sender.sendMessage("§cSomething went wrong saving config file " + configFile.getPath());
+        if (!save(config, sender)) return true;
 
-            return true;
-        }
-
-        for (Nextbot bot : Main.getBots()) {
-            if (!bot.getName().equals(args[1])) continue;
-
-            NextbotDisplay display = bot.getDisplay();
-
+        applyToBots(args[1], display -> {
             while (display.getFrameAmount() != 0) {
                 display.removeFrame(0);
             }
 
             display.addImage(args[2]);
-        }
+        });
 
         sender.sendMessage("§cSet " + args[1] + "'s image to " + args[2]);
 

@@ -53,14 +53,7 @@ public class CreateCommand extends NextbotCommand {
         config.set("fuzz", 0);
         config.createSection("ignoredColors");
 
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            sender.sendMessage("§cSomething went wrong saving config file " + configFile.getPath());
-
-            return true;
-        }
+        if (!save(config, sender)) return true;
 
         sender.sendMessage("§cSuccessfully created " + args[1]);
 

@@ -2,7 +2,6 @@ package me.zelha.nextbots.commands;
 
 import hm.zelha.particlesfx.util.Color;
 import hm.zelha.particlesfx.util.LocationSafe;
-import me.zelha.nextbots.Main;
 import me.zelha.nextbots.nextbot.Nextbot;
 import me.zelha.nextbots.nextbot.NextbotDisplay;
 import org.bukkit.Bukkit;
@@ -10,28 +9,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
 
 public class SummonCommand extends NextbotCommand {
-
-    private final File dataFolder = Main.getInstance().getDataFolder();
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length <= 1) {
             help(sender);
-
-            return true;
-        }
-
-        File configFile = new File(dataFolder, args[1] + ".yml");
-
-        if (!configFile.exists()) {
-            sender.sendMessage("§cNextbot " + args[1] + " doesn't exist!");
 
             return true;
         }
@@ -52,7 +38,10 @@ public class SummonCommand extends NextbotCommand {
             center = new LocationSafe(((Player) sender).getLocation());
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        FileConfiguration config = getConfig(args[1], sender);
+
+        if (config == null) return true;
+
         String imageLink = config.getString("imageLink");
         String imageFile = config.getString("imageFile");
         int particles = config.getInt("particles");
@@ -84,12 +73,7 @@ public class SummonCommand extends NextbotCommand {
         if (xRadius == 0 && zRadius == 0) {
             config.set("xRadius", display.getXRadius());
             config.set("zRadius", display.getZRadius());
-
-            try {
-                config.save(configFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            save(config, sender);
         } else {
             display.setXRadius(xRadius);
             display.setZRadius(zRadius);

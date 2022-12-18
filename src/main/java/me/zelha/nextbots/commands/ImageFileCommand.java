@@ -1,20 +1,12 @@
 package me.zelha.nextbots.commands;
 
-import me.zelha.nextbots.Main;
-import me.zelha.nextbots.nextbot.Nextbot;
-import me.zelha.nextbots.nextbot.NextbotDisplay;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 
 public class ImageFileCommand extends NextbotCommand {
-
-    private final File dataFolder = Main.getInstance().getDataFolder();
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length <= 2) {
@@ -23,14 +15,7 @@ public class ImageFileCommand extends NextbotCommand {
             return true;
         }
 
-        File configFile = new File(dataFolder, args[1] + ".yml");
         File imageFile = new File(args[2]);
-
-        if (!configFile.exists()) {
-            sender.sendMessage("§cNextbot " + args[1] + " doesn't exist!");
-
-            return true;
-        }
 
         if (!imageFile.exists()) {
             sender.sendMessage("§cThere is no file at " + args[2] + " !");
@@ -38,31 +23,22 @@ public class ImageFileCommand extends NextbotCommand {
             return true;
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        FileConfiguration config = getConfig(args[1], sender);
+
+        if (config == null) return true;
 
         config.set("imageFile", args[2]);
         config.set("imageLink", "");
 
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            sender.sendMessage("§cSomething went wrong saving config file " + configFile.getPath());
+        if (!save(config, sender)) return true;
 
-            return true;
-        }
-
-        for (Nextbot bot : Main.getBots()) {
-            if (!bot.getName().equals(args[1])) continue;
-
-            NextbotDisplay display = bot.getDisplay();
-
+        applyToBots(args[1], display -> {
             while (display.getFrameAmount() != 0) {
                 display.removeFrame(0);
             }
 
             display.addImage(imageFile);
-        }
+        });
 
         sender.sendMessage("§cSet " + args[1] + "'s image to " + args[2]);
 

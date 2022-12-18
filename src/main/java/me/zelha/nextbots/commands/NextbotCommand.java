@@ -1,11 +1,22 @@
 package me.zelha.nextbots.commands;
 
+import me.zelha.nextbots.Main;
 import me.zelha.nextbots.NextbotSubCommands;
+import me.zelha.nextbots.nextbot.Nextbot;
+import me.zelha.nextbots.nextbot.NextbotDisplay;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.function.Consumer;
 
 public class NextbotCommand implements CommandExecutor {
+
+    protected final File dataFolder = Main.getInstance().getDataFolder();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -37,7 +48,41 @@ public class NextbotCommand implements CommandExecutor {
                 "§7- §c/Nextbot list §f- §7Lists all existing nextbots.\n" +
                 "§7- §c/Nextbot remove <name> §f- §7Removes the nextbot with the given name.\n" +
                 "§7- §c/Nextbot imagelink <name> <link> §f- §7Sets the link that the given nextbot will get it's image from.\n" +
-                "§7- §c/Nextbot imagefile <name> <path> §f- §7Sets the file that the given nextbot will get it's image from."
+                "§7- §c/Nextbot imagefile <name> <path> §f- §7Sets the file that the given nextbot will get it's image from.\n" +
+                "§7- §c/Nextbot particle <name> <number> §f- §7"
         );
+    }
+
+    protected FileConfiguration getConfig(String name, CommandSender sender) {
+        File configFile = new File(dataFolder, name + ".yml");
+
+        if (!configFile.exists()) {
+            sender.sendMessage("§cNextbot " + name + " doesn't exist!");
+
+            return null;
+        }
+
+        return YamlConfiguration.loadConfiguration(configFile);
+    }
+
+    protected boolean save(FileConfiguration config, CommandSender sender) {
+        try {
+            config.save(config.getCurrentPath());
+
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            sender.sendMessage("§cSomething went wrong saving config file " + config.getCurrentPath());
+
+            return false;
+        }
+    }
+
+    protected void applyToBots(String name, Consumer<NextbotDisplay> consumer) {
+        for (Nextbot bot : Main.getBots()) {
+            if (!bot.getName().equals(name)) continue;
+
+            consumer.accept(bot.getDisplay());
+        }
     }
 }

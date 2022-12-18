@@ -1,15 +1,11 @@
 package me.zelha.nextbots.commands;
 
-import me.zelha.nextbots.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
 
 public class RemoveCommand extends NextbotCommand {
-
-    private final File dataFolder = Main.getInstance().getDataFolder();
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length <= 1) {
