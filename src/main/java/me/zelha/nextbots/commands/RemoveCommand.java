@@ -1,9 +1,12 @@
 package me.zelha.nextbots.commands;
 
+import me.zelha.nextbots.Main;
+import me.zelha.nextbots.nextbot.Nextbot;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class RemoveCommand extends NextbotCommand {
     @Override
@@ -16,6 +19,12 @@ public class RemoveCommand extends NextbotCommand {
 
         if (new File(dataFolder, args[1] + ".yml").delete()) {
             sender.sendMessage("§cSuccessfully deleted " + args[1]);
+
+            for (Nextbot bot : new ArrayList<>(Main.getBots())) {
+                if (!bot.getName().equals(args[1])) continue;
+
+                bot.despawn();
+            }
         } else {
             sender.sendMessage("§cNextbot " + args[1] + " doesn't exist!");
         }
