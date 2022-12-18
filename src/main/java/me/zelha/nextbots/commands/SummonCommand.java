@@ -71,7 +71,7 @@ public class SummonCommand extends NextbotCommand {
         Nextbot bot;
         NextbotDisplay display;
 
-        if (imageFile.isEmpty()) {
+        if (!imageFile.isEmpty()) {
             bot = new Nextbot(center, new File(imageFile), args[1]);
         } else {
             bot = new Nextbot(center, imageLink, args[1]);

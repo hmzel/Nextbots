@@ -7,7 +7,8 @@ public enum NextbotSubCommands {
     CREATE(new CreateCommand()),
     SUMMON(new SummonCommand()),
     LIST(new ListCommand()),
-    REMOVE(new RemoveCommand());
+    REMOVE(new RemoveCommand()),
+    IMAGELINK(new ImageLinkCommand());
 
     private final NextbotCommand command;
 
