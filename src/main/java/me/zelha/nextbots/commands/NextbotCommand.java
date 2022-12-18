@@ -65,14 +65,16 @@ public class NextbotCommand implements CommandExecutor {
         return YamlConfiguration.loadConfiguration(configFile);
     }
 
-    protected boolean save(FileConfiguration config, CommandSender sender) {
+    protected boolean save(FileConfiguration config, String name, CommandSender sender) {
+        File configFile = new File(dataFolder, name + ".yml");
+
         try {
-            config.save(config.getCurrentPath());
+            config.save(configFile);
 
             return true;
         } catch (IOException e) {
             e.printStackTrace();
-            sender.sendMessage("§cSomething went wrong saving config file " + config.getCurrentPath());
+            sender.sendMessage("§cSomething went wrong saving config file " + configFile.getPath());
 
             return false;
         }

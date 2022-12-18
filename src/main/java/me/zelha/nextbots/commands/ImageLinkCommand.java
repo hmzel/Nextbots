@@ -20,7 +20,7 @@ public class ImageLinkCommand extends NextbotCommand {
         config.set("imageLink", args[2]);
         config.set("imageFile", "");
 
-        if (!save(config, sender)) return true;
+        if (!save(config, args[1], sender)) return true;
 
         applyToBots(args[1], display -> {
             while (display.getFrameAmount() != 0) {

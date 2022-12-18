@@ -73,7 +73,7 @@ public class SummonCommand extends NextbotCommand {
         if (xRadius == 0 && zRadius == 0) {
             config.set("xRadius", display.getXRadius());
             config.set("zRadius", display.getZRadius());
-            save(config, sender);
+            save(config, args[1], sender);
         } else {
             display.setXRadius(xRadius);
             display.setZRadius(zRadius);
