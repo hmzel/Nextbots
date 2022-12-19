@@ -24,7 +24,7 @@ public class ListCommand extends NextbotCommand {
     }
 
     @Override
-    public void help(CommandSender sender) {
+    public void help(CommandSender sender, int page) {
         sender.sendMessage(
                 "§7-------------------- [ §cNextbots §7] --------------------\n" +
                 "§c/Nextbot list\n" +

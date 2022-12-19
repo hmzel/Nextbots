@@ -11,7 +11,7 @@ public class KillCommand extends NextbotCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length <= 1) {
-            help(sender);
+            help(sender, 0);
 
             return true;
         }
@@ -26,7 +26,7 @@ public class KillCommand extends NextbotCommand {
     }
 
     @Override
-    public void help(CommandSender sender) {
+    public void help(CommandSender sender, int page) {
         sender.sendMessage(
                 "§7-------------------- [ §cNextbots §7] --------------------\n" +
                 "§c/Nextbot kill <name>\n" +
