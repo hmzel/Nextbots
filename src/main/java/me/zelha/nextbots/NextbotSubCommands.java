@@ -16,7 +16,8 @@ public enum NextbotSubCommands {
     HEIGHT(new HeightCommand()),
     FRAMEDELAY(new FrameDelayCommand()),
     FUZZ(new FuzzCommand()),
-    IGNORECOLOR(new IgnoreColorCommand());
+    IGNORECOLOR(new IgnoreColorCommand()),
+    UNIGNORECOLOR(new UnignoreColorCommand());
 
     private final NextbotCommand command;
 

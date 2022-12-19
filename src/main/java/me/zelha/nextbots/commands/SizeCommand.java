@@ -56,7 +56,7 @@ public class SizeCommand extends NextbotCommand {
             return true;
         }
 
-        if (image.getWidth() >= image.getHeight()) {
+        if (image.getWidth() <= image.getHeight()) {
             width = size * ((double) image.getWidth() / image.getHeight());
             height = size;
         } else {
