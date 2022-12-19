@@ -12,7 +12,8 @@ public enum NextbotSubCommands {
     IMAGEFILE(new ImageFileCommand()),
     PARTICLE(new ParticleCommand()),
     SIZE(new SizeCommand()),
-    WIDTH(new WidthCommand());
+    WIDTH(new WidthCommand()),
+    HEIGHT(new HeightCommand());
 
     private final NextbotCommand command;
 
