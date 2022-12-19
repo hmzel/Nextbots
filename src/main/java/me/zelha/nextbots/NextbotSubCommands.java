@@ -13,7 +13,8 @@ public enum NextbotSubCommands {
     PARTICLE(new ParticleCommand()),
     SIZE(new SizeCommand()),
     WIDTH(new WidthCommand()),
-    HEIGHT(new HeightCommand());
+    HEIGHT(new HeightCommand()),
+    FRAMEDELAY(new FrameDelayCommand());
 
     private final NextbotCommand command;
 

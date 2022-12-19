@@ -52,7 +52,8 @@ public class NextbotCommand implements CommandExecutor {
                 "§7- §c/Nextbot particle <name> <number> §f- §7Sets the amount of particles the given nextbot will send per tick.\n" +
                 "§7- §c/Nextbot size <name> <number> §f- §7Sets the size of the given nextbot's image based on it's aspect ratio.\n" +
                 "§7- §c/Nextbot width <name> <number> §f- §7Sets the width of the given nextbot's image.\n" +
-                "§7- §c/Nextbot height <name> <number> §f- §7Sets the height of the given nextbot's image."
+                "§7- §c/Nextbot height <name> <number> §f- §7Sets the height of the given nextbot's image.\n" +
+                "§7- §c/Nextbot framedelay <name> <number> §f- §7Sets the tick delay between the given nextbot's frames"
         );
     }
 
