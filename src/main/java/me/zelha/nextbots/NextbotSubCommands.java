@@ -6,6 +6,7 @@ public enum NextbotSubCommands {
     HELP(new HelpCommand()),
     CREATE(new CreateCommand()),
     SUMMON(new SummonCommand()),
+    KILL(new KillCommand()),
     LIST(new ListCommand()),
     REMOVE(new RemoveCommand()),
     IMAGELINK(new ImageLinkCommand()),

@@ -45,6 +45,7 @@ public class NextbotCommand implements CommandExecutor {
                 "§7- §c/Nextbot help <command> §f- §7Displays this, or the usage of a command.\n" +
                 "§7- §c/Nextbot create <name> §f- §7Creates a nextbot with the given name.\n" +
                 "§7- §c/Nextbot summon <name> <x> <y> <z> §f- §7Summons the nextbot with the given name.\n" +
+                "§7- §c/Nextbot kill <name> §f- §7Kills the given nextbot." +
                 "§7- §c/Nextbot list §f- §7Lists all existing nextbots.\n" +
                 "§7- §c/Nextbot remove <name> §f- §7Removes the nextbot with the given name.\n" +
                 "§7- §c/Nextbot imagelink <name> <link> §f- §7Sets the link that the given nextbot will get it's image from.\n" +
