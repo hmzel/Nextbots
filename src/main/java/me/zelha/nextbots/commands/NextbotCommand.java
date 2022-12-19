@@ -54,7 +54,8 @@ public class NextbotCommand implements CommandExecutor {
                 "§7- §c/Nextbot width <name> <number> §f- §7Sets the width of the given nextbot's image.\n" +
                 "§7- §c/Nextbot height <name> <number> §f- §7Sets the height of the given nextbot's image.\n" +
                 "§7- §c/Nextbot framedelay <name> <number> §f- §7Sets the tick delay between the given nextbot's frames.\n" +
-                "§7- §c/Nextbot fuzz <name> <number> §f- §7Sets how accurate ignored colors are."
+                "§7- §c/Nextbot fuzz <name> <number> §f- §7Sets how accurate ignored colors are.\n" +
+                "§7- §c/Nextbot ignorecolor <name> <red> <green> <blue> §f- §7Makes the given nextbot not display the given color."
         );
     }
 

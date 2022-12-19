@@ -82,7 +82,7 @@ public class SummonCommand extends NextbotCommand {
         display.setFrameDelay(frameDelay);
         display.setFuzz(fuzz);
 
-        for (String string : ignoredColors.getValues(false).keySet()) {
+        for (String string : ignoredColors.getKeys(false)) {
             org.bukkit.Color color = ignoredColors.getColor(string);
 
             display.addIgnoredColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
