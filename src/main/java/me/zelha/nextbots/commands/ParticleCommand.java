@@ -26,8 +26,8 @@ public class ParticleCommand extends NextbotCommand {
             return true;
         }
 
-        if (particles <= 1) {
-            sender.sendMessage("§cNeeds to be more than 1 particle.");
+        if (particles < 1) {
+            sender.sendMessage("§cNeeds to be at least 1 particle.");
 
             return true;
         }

@@ -13,7 +13,7 @@
 
     <description>Nextbots in minecraft</description>
     <properties>
-        <java.version>17.0.1</java.version>
+        <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
