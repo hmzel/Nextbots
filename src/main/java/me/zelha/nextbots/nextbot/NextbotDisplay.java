@@ -1,16 +1,15 @@
 package me.zelha.nextbots.nextbot;
 
-import com.sun.imageio.plugins.gif.GIFImageReader;
 import hm.zelha.particlesfx.shapers.parents.RotationHandler;
 import hm.zelha.particlesfx.util.Color;
 import hm.zelha.particlesfx.util.LocationSafe;
-import hm.zelha.particlesfx.util.PatchedGIFImageReader;
 import me.zelha.nextbots.Main;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -18,6 +17,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.joml.Vector3f;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -116,7 +116,7 @@ public class NextbotDisplay extends RotationHandler {
 
                     continue main;
                 }
-                
+
                 locationHelper.zero().add(getCenter());
                 vectorHelper.setX(((x / image.getWidth() * 2) - 1) * xRadius);
                 vectorHelper.setY(0);
@@ -166,27 +166,27 @@ public class NextbotDisplay extends RotationHandler {
                 ImageInputStream input = ImageIO.createImageInputStream(toLoad);
                 ImageReader reader = ImageIO.getImageReaders(input).next();
 
-                if (reader instanceof GIFImageReader) {
-                    reader = new PatchedGIFImageReader(null);
-                }
-
                 reader.setInput(input);
 
                 double imageAmount = reader.getNumImages(true);
 
                 for (int i = 0; i < imageAmount; i++) {
-                    BufferedImage image = reader.read(i);
+                    try {
+                        BufferedImage image = reader.read(i);
 
-                    images.add(image);
+                        images.add(image);
 
-                    if (xRadius == 0 && zRadius == 0) {
-                        if (image.getWidth() >= image.getHeight()) {
-                            xRadius = 3 * ((double) image.getWidth() / image.getHeight());
-                            zRadius = 3;
-                        } else {
-                            xRadius = 3;
-                            zRadius = 3 * ((double) image.getHeight() / image.getWidth());
+                        if (xRadius == 0 && zRadius == 0) {
+                            if (image.getWidth() >= image.getHeight()) {
+                                xRadius = 3 * ((double) image.getWidth() / image.getHeight());
+                                zRadius = 3;
+                            } else {
+                                xRadius = 3;
+                                zRadius = 3 * ((double) image.getHeight() / image.getWidth());
+                            }
                         }
+                    } catch (IIOException e) {
+                        Bukkit.getLogger().warning("frame " + i + " had an error while loading and wasn't added.");
                     }
                 }
             } catch (Throwable ex) {
@@ -198,18 +198,6 @@ public class NextbotDisplay extends RotationHandler {
 
         currentThread = thread;
     }
-    
-    public void setImage(String link) {
-        try {
-            setImages(new URL(link).openStream());
-        }  catch (Throwable ex) {
-            Bukkit.getServer().getLogger().log(Level.SEVERE, "Failed to load image from " + link, ex);
-        }
-    }
-    
-    public void setImage(File path) {
-        setImages(path);
-    }
 
     public void addIgnoredColor(Color color) {
         ignoredColors.add(color);
@@ -218,7 +206,27 @@ public class NextbotDisplay extends RotationHandler {
     public void removeIgnoredColor(int index) {
         ignoredColors.remove(index);
     }
-    
+
+    public void setImage(String link) {
+        try {
+            setImages(new URL(link).openStream());
+        }  catch (Throwable ex) {
+            Bukkit.getServer().getLogger().log(Level.SEVERE, "Failed to load image from " + link, ex);
+        }
+    }
+
+    public void setImage(File path) {
+        setImages(path);
+    }
+
+    public void setXRadius(double xRadius) {
+        this.xRadius = xRadius;
+    }
+
+    public void setZRadius(double zRadius) {
+        this.zRadius = zRadius;
+    }
+
     public void setParticleFrequency(int particleFrequency) {
         this.particleFrequency = particleFrequency;
     }
@@ -236,6 +244,12 @@ public class NextbotDisplay extends RotationHandler {
             locations.remove(0);
         }
     }
+
+    @Override
+    public void setWorld(World world) {
+        super.setWorld(world);
+        locationHelper.setWorld(world);
+    }
     
     public void setFuzz(int fuzz) {
         this.fuzz = fuzz;
@@ -247,5 +261,13 @@ public class NextbotDisplay extends RotationHandler {
 
     public Location getCenter() {
         return locations.get(0);
+    }
+
+    public double getXRadius() {
+        return xRadius;
+    }
+
+    public double getZRadius() {
+        return zRadius;
     }
 }
