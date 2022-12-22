@@ -40,8 +40,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Nextbot extends Zombie {
 
-    //TODO: make it so nextbot can attack people under water
-
     private final ThreadLocalRandom rng = ThreadLocalRandom.current();
     private final NextbotDisplay display;
     private final Location lHelper;
@@ -67,6 +65,7 @@ public class Nextbot extends Zombie {
         lHelper = display.getCenter().clone();
         bukkitPickUpLoot = false;
 
+        setCanBreakDoors(true);
         goalSelector.getAvailableGoals().clear();
         targetSelector.getAvailableGoals().clear();
         goalSelector.addGoal(0, new FloatGoal(this));
@@ -74,6 +73,10 @@ public class Nextbot extends Zombie {
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0D));
         goalSelector.addGoal(1, new BreakDoorGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, net.minecraft.world.entity.player.Player.class, true, true));
+
+        navigation = new GroundPathNavigation(this, this.level);
+
+        navigation.setCanFloat(true);
         setCustomName(CraftChatMessage.fromStringOrNull(name));
         setPersistenceRequired(true);
         setCanPickUpLoot(false);
