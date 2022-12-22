@@ -3,19 +3,21 @@ package me.zelha.nextbots.nextbot;
 import hm.zelha.particlesfx.util.LocationSafe;
 import me.zelha.nextbots.Main;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.Drowned;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
@@ -33,23 +35,25 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Nextbot extends Drowned {
+public class Nextbot extends Zombie {
+
+    //TODO: make it so nextbot can attack people under water
 
     private final ThreadLocalRandom rng = ThreadLocalRandom.current();
     private final NextbotDisplay display;
     private final Location lHelper;
     private BukkitTask animator = null;
+    private ServerPlayer fluidTarget = null;
     int hasntMoved = 0;
     int flyingMenacingly = 0;
     int angry = 0;
     int calm = 0;
 
     public Nextbot(LocationSafe center, Object obj, String name) {
-        super(EntityType.DROWNED, ((CraftWorld) center.getWorld()).getHandle());
+        super(EntityType.ZOMBIE, ((CraftWorld) center.getWorld()).getHandle());
 
         Main.registerBot(this);
         setPos(center.getX(), center.getY(), center.getZ());
@@ -70,9 +74,6 @@ public class Nextbot extends Drowned {
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0D));
         goalSelector.addGoal(1, new BreakDoorGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, net.minecraft.world.entity.player.Player.class, true, true));
-        groundNavigation.setAvoidSun(false);
-        groundNavigation.setCanFloat(true);
-        waterNavigation.setCanFloat(true);
         setCustomName(CraftChatMessage.fromStringOrNull(name));
         setPersistenceRequired(true);
         setCanPickUpLoot(false);
@@ -111,8 +112,18 @@ public class Nextbot extends Drowned {
 
                 if (nearest == null) return;
 
-                craftAttributes.getAttribute(Attribute.GENERIC_FOLLOW_RANGE).setBaseValue(Math.sqrt(dist));
-                setTarget(((CraftPlayer) nearest).getHandle(), EntityTargetEvent.TargetReason.CUSTOM, false);
+                ServerPlayer nmsPlayer = ((CraftPlayer) nearest).getHandle();
+
+                if (nmsPlayer.isEyeInFluid(FluidTags.WATER) || nmsPlayer.isEyeInFluid(FluidTags.LAVA)) {
+                    fluidTarget = nmsPlayer;
+
+                    setTarget(null);
+                } else {
+                    craftAttributes.getAttribute(Attribute.GENERIC_FOLLOW_RANGE).setBaseValue(Math.sqrt(dist));
+                    setTarget(nmsPlayer, EntityTargetEvent.TargetReason.CUSTOM, false);
+
+                    fluidTarget = null;
+                }
             }
         }.runTaskTimer(Main.getInstance(), 0, 1);
     }
@@ -129,6 +140,16 @@ public class Nextbot extends Drowned {
 
     @Override
     public void tick() {
+        if (getTarget() != null && (getTarget().isEyeInFluid(FluidTags.WATER) || getTarget().isEyeInFluid(FluidTags.LAVA))) {
+            setTarget(null);
+        }
+        
+        if (fluidTarget != null && ((!fluidTarget.isEyeInFluid(FluidTags.WATER) && !fluidTarget.isEyeInFluid(FluidTags.LAVA))
+           || !fluidTarget.isAlive() || fluidTarget.gameMode.getGameModeForPlayer() == GameType.CREATIVE
+           || fluidTarget.gameMode.getGameModeForPlayer() == GameType.SPECTATOR)) {
+            fluidTarget = null;
+        }
+
         super.tick();
         super.tick();
         super.tick();
@@ -151,7 +172,7 @@ public class Nextbot extends Drowned {
             angry = 0;
         }
 
-        if (getTarget() != null && hasntMoved >= 300) {
+        if ((getTarget() != null && hasntMoved >= 300) || fluidTarget != null) {
             if (flyingMenacingly >= 100 && angry < 3) {
                 flyingMenacingly = 0;
                 hasntMoved = 0;
@@ -161,9 +182,10 @@ public class Nextbot extends Drowned {
                 return;
             }
 
-            double motX = getTarget().getX() - this.getX();
-            double motY = getTarget().getY() - this.getY();
-            double motZ = getTarget().getZ() - this.getZ();
+            Entity entity = (getTarget() != null) ? getTarget() : fluidTarget;
+            double motX = entity.getX() - this.getX();
+            double motY = entity.getY() - this.getY();
+            double motZ = entity.getZ() - this.getZ();
 
             if (motX > 0) {
                 motX = Math.min(motX, 1);
@@ -172,7 +194,7 @@ public class Nextbot extends Drowned {
             }
 
             if (motY > 0) {
-                motY = Math.min(motY, 2);
+                motY = Math.min(motY, 4);
             } else {
                 motY = Math.max(motY, -2);
             }
@@ -190,10 +212,10 @@ public class Nextbot extends Drowned {
 
             move(MoverType.SELF, new Vec3(motX, motY, motZ));
 
-            for (org.bukkit.entity.Entity entity : getLevel().getWorld().getNearbyEntities(lHelper.zero().add(getX(), getY(), getZ()), getBbWidth(), getBbHeight(), getBbWidth())) {
-                if (!(entity instanceof Player)) continue;
+            for (org.bukkit.entity.Entity bukkitEntity : getLevel().getWorld().getNearbyEntities(lHelper.zero().add(getX(), getY(), getZ()), getBbWidth(), getBbHeight(), getBbWidth())) {
+                if (!(bukkitEntity instanceof Player)) continue;
 
-                if (((CraftPlayer) entity).getHandle().hurt(DamageSource.mobAttack(this), 13131313)) {
+                if (((CraftPlayer) bukkitEntity).getHandle().hurt(DamageSource.mobAttack(this), 13131313)) {
                     flyingMenacingly = 0;
                     hasntMoved = 0;
                     calm = 0;
@@ -230,14 +252,6 @@ public class Nextbot extends Drowned {
     }
 
     @Override
-    public boolean isInWater() {
-        if (getTarget() == null) return super.isInWater();
-        if (getTarget().getY() <= this.getY()) return false;
-
-        return super.isInWater();
-    }
-
-    @Override
     public void travel(Vec3 vec3d) {
         if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
             double posY = this.getY();
@@ -268,7 +282,7 @@ public class Nextbot extends Drowned {
                 float blockFriction = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction();
                 float friction = this.onGround ? blockFriction * 0.91F : 0.91F;
                 vec3d1 = this.handleRelativeFrictionAndCalculateMovement(vec3d, blockFriction);
-                double vecY = vec3d1.y;
+                double vecY = vec3d1.y - 0.03D;
 
                 if (this.shouldDiscardFriction()) {
                     this.setDeltaMovement(vec3d1.x, vecY, vec3d1.z);
@@ -292,8 +306,18 @@ public class Nextbot extends Drowned {
     }
 
     @Override
-    public boolean okTarget(@Nullable LivingEntity entityliving) {
-        return entityliving != null;
+    protected boolean convertsInWater() {
+        return false;
+    }
+
+    @Override
+    protected boolean isSunSensitive() {
+        return false;
+    }
+
+    @Override
+    protected boolean isSunBurnTick() {
+        return false;
     }
 
     @Override
