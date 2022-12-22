@@ -32,14 +32,7 @@ public class ImageFileCommand extends NextbotCommand {
 
         if (!save(config, args[1], sender)) return true;
 
-        applyToBots(args[1], display -> {
-            while (display.getFrameAmount() != 0) {
-                display.removeFrame(0);
-            }
-
-            display.addImage(imageFile);
-        });
-
+        applyToBots(args[1], display -> display.setImage(imageFile));
         sender.sendMessage("§cSet " + args[1] + "'s image to " + args[2]);
 
         return true;

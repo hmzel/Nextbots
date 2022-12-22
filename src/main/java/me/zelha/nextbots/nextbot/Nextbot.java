@@ -2,33 +2,46 @@ package me.zelha.nextbots.nextbot;
 
 import hm.zelha.particlesfx.util.LocationSafe;
 import me.zelha.nextbots.Main;
-import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Drowned;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Nextbot extends EntityZombie {
+public class Nextbot extends Drowned {
 
     private final ThreadLocalRandom rng = ThreadLocalRandom.current();
     private final NextbotDisplay display;
     private final Location lHelper;
-    private final ItemStack kbItem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.STICK));
     private BukkitTask animator = null;
     int hasntMoved = 0;
     int flyingMenacingly = 0;
@@ -36,10 +49,10 @@ public class Nextbot extends EntityZombie {
     int calm = 0;
 
     public Nextbot(LocationSafe center, Object obj, String name) {
-        super(((CraftWorld) center.getWorld()).getHandle());
+        super(EntityType.DROWNED, ((CraftWorld) center.getWorld()).getHandle());
 
         Main.registerBot(this);
-        setPosition(center.getX(), center.getY(), center.getZ());
+        setPos(center.getX(), center.getY(), center.getZ());
 
         if (obj instanceof File) {
             display = new NextbotDisplay(center, (File) obj);
@@ -48,30 +61,26 @@ public class Nextbot extends EntityZombie {
         }
 
         lHelper = display.getCenter().clone();
-        persistent = true;
-        canPickUpLoot = false;
-        List goalB = (List) getPrivateField("b", PathfinderGoalSelector.class, goalSelector);
-        List goalC = (List) getPrivateField("c", PathfinderGoalSelector.class, goalSelector);
-        List targetB = (List) getPrivateField("b", PathfinderGoalSelector.class, targetSelector);
-        List targetC = (List) getPrivateField("c", PathfinderGoalSelector.class, targetSelector);
+        bukkitPickUpLoot = false;
 
-        goalB.clear();
-        goalC.clear();
-        targetB.clear();
-        targetC.clear();
-        this.goalSelector.a(0, new PathfinderGoalFloat(this));
-        this.goalSelector.a(2, new PathfinderGoalMeleeAttack(this, EntityHuman.class, 1.0D, false));
-        this.goalSelector.a(5, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
-        this.goalSelector.a(1, new PathfinderGoalBreakDoor(this));
-        this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget(this, EntityHuman.class, true, true));
-        ((Map) getPrivateField("c", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put("Nextbot", Nextbot.class);
-        ((Map) getPrivateField("d", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, "Nextbot");
-        ((Map) getPrivateField("f", net.minecraft.server.v1_8_R3.EntityTypes.class, null)).put(Nextbot.class, 54);
-        setCustomName(name);
-        addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
-        getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(13131313);
-        kbItem.addEnchantment(Enchantment.KNOCKBACK, 127);
-        ((CraftWorld) center.getWorld()).getHandle().addEntity(this);
+        goalSelector.getAvailableGoals().clear();
+        targetSelector.getAvailableGoals().clear();
+        goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, false));
+        goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0D));
+        goalSelector.addGoal(1, new BreakDoorGoal(this));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, net.minecraft.world.entity.player.Player.class, true, true));
+        groundNavigation.setAvoidSun(false);
+        groundNavigation.setCanFloat(true);
+        waterNavigation.setCanFloat(true);
+        setCustomName(CraftChatMessage.fromStringOrNull(name));
+        setPersistenceRequired(true);
+        setCanPickUpLoot(false);
+        setSilent(true);
+        addEffect(new MobEffectInstance(MobEffect.byId(PotionEffectType.INVISIBILITY.getId()), Integer.MAX_VALUE, 1, true, true));
+        craftAttributes.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(13131313);
+        craftAttributes.getAttribute(Attribute.GENERIC_ATTACK_KNOCKBACK).setBaseValue(13131313);
+        ((CraftWorld) center.getWorld()).getHandle().getMinecraftWorld().addFreshEntity(this);
 
         start();
     }
@@ -84,10 +93,10 @@ public class Nextbot extends EntityZombie {
                 Player nearest = null;
                 double dist = Double.MAX_VALUE;
 
-                addEffect(new MobEffect(PotionEffectType.INVISIBILITY.getId(), Integer.MAX_VALUE, 1, true, true));
-                center.setX(Nextbot.this.locX);
-                center.setY(Nextbot.this.locY + (Nextbot.this.length / 2) + (display.getZRadius() / 2));
-                center.setZ(Nextbot.this.locZ);
+                addEffect(new MobEffectInstance(MobEffect.byId(PotionEffectType.INVISIBILITY.getId()), Integer.MAX_VALUE, 1, true, true));
+                center.setX(Nextbot.this.getX());
+                center.setY(Nextbot.this.getY() + (Nextbot.this.getBbHeight() / 2) + (display.getZRadius() / 2));
+                center.setZ(Nextbot.this.getZ());
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) continue;
@@ -102,8 +111,8 @@ public class Nextbot extends EntityZombie {
 
                 if (nearest == null) return;
 
-                getAttributeInstance(GenericAttributes.FOLLOW_RANGE).setValue(Math.sqrt(dist));
-                setGoalTarget(((CraftPlayer) nearest).getHandle(), EntityTargetEvent.TargetReason.CUSTOM, false);
+                craftAttributes.getAttribute(Attribute.GENERIC_FOLLOW_RANGE).setBaseValue(Math.sqrt(dist));
+                setTarget(((CraftPlayer) nearest).getHandle(), EntityTargetEvent.TargetReason.CUSTOM, false);
             }
         }.runTaskTimer(Main.getInstance(), 0, 1);
     }
@@ -112,26 +121,26 @@ public class Nextbot extends EntityZombie {
         Main.unregisterBot(this);
         display.stop();
         animator.cancel();
-        die();
+        die(DamageSource.OUT_OF_WORLD);
         setHealth(0);
 
-        deathTicks = 100;
+        dead = true;
     }
 
     @Override
-    public void t_() {
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
-        super.t_();
+    public void tick() {
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
+        super.tick();
 
-        if (getGoalTarget() != null && this.locX == this.lastX && this.locZ == this.lastZ) {
+        if (getTarget() != null && this.getX() == this.xOld && this.getZ() == this.zOld) {
             hasntMoved++;
         } else if (flyingMenacingly == 0) {
             hasntMoved = 0;
@@ -142,7 +151,7 @@ public class Nextbot extends EntityZombie {
             angry = 0;
         }
 
-        if (getGoalTarget() != null && hasntMoved >= 300) {
+        if (getTarget() != null && hasntMoved >= 300) {
             if (flyingMenacingly >= 100 && angry < 3) {
                 flyingMenacingly = 0;
                 hasntMoved = 0;
@@ -152,9 +161,9 @@ public class Nextbot extends EntityZombie {
                 return;
             }
 
-            double motX = getGoalTarget().locX - this.locX;
-            double motY = getGoalTarget().locY - this.locY;
-            double motZ = getGoalTarget().locZ - this.locZ;
+            double motX = getTarget().getX() - this.getX();
+            double motY = getTarget().getY() - this.getY();
+            double motZ = getTarget().getZ() - this.getZ();
 
             if (motX > 0) {
                 motX = Math.min(motX, 1);
@@ -179,12 +188,12 @@ public class Nextbot extends EntityZombie {
                 motZ = rng.nextInt(2) - 1;
             }
 
-            move(motX, motY, motZ);
+            move(MoverType.SELF, new Vec3(motX, motY, motZ));
 
-            for (org.bukkit.entity.Entity entity : getWorld().getWorld().getNearbyEntities(lHelper.zero().add(locX, locY, locZ), width, length, width)) {
+            for (org.bukkit.entity.Entity entity : getLevel().getWorld().getNearbyEntities(lHelper.zero().add(getX(), getY(), getZ()), getBbWidth(), getBbHeight(), getBbWidth())) {
                 if (!(entity instanceof Player)) continue;
 
-                if (((CraftPlayer) entity).getHandle().damageEntity(DamageSource.mobAttack(this), 13131313)) {
+                if (((CraftPlayer) entity).getHandle().hurt(DamageSource.mobAttack(this), 13131313)) {
                     flyingMenacingly = 0;
                     hasntMoved = 0;
                     calm = 0;
@@ -199,7 +208,7 @@ public class Nextbot extends EntityZombie {
     }
 
     @Override
-    public void move(double d0, double d1, double d2) {
+    public void move(MoverType moverType, Vec3 vec3d) {
         if (angry >= 3 && flyingMenacingly > 0) {
             for (int x = (int) display.getXRadius(); x >= (int) -display.getXRadius(); x--) {
                 for (int y = (int) display.getZRadius(); y >= (int) -display.getZRadius(); y--) {
@@ -208,174 +217,119 @@ public class Nextbot extends EntityZombie {
 
                         if (block.getType() == Material.AIR) continue;
 
-                        String breakSound = world.getType(new BlockPosition(lHelper.getBlockX(), lHelper.getBlockY(), lHelper.getBlockZ())).getBlock().stepSound.getBreakSound();
+                        SoundType breakSound = level.getBlockState(new BlockPos(lHelper.getBlockX(), lHelper.getBlockY(), lHelper.getBlockZ())).getSoundType();
 
                         block.breakNaturally();
-                        world.makeSound(lHelper.getX(), lHelper.getY(), lHelper.getZ(), breakSound, 2.5f, 1);
+                        level.playLocalSound(lHelper.getX(), lHelper.getY(), lHelper.getZ(), breakSound.breakSound, SoundSource.BLOCKS, 1, 1, true);
                     }
                 }
             }
         }
 
-        super.move(d0, d1, d2);
+        super.move(moverType, vec3d);
     }
 
     @Override
-    public boolean V() {
-        if (getGoalTarget() == null) return inWater;
+    public boolean isInWater() {
+        if (getTarget() == null) return super.isInWater();
+        if (getTarget().getY() <= this.getY()) return false;
 
-        if (getGoalTarget().locY <= this.locY
-           && getGoalTarget().locX - 1 < this.locX
-           && getGoalTarget().locX + 1 > this.locX
-           && getGoalTarget().locZ - 1 < this.locZ
-           && getGoalTarget().locZ + 1 > this.locZ) return false;
-
-        return inWater;
+        return super.isInWater();
     }
 
     @Override
-    public void g(float f, float f1) {
-        double d0 = this.locY;
-        float f3;
-        float f4;
+    public void travel(Vec3 vec3d) {
+        if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+            double posY = this.getY();
+            Vec3 vec3d1;
 
-        if (this.bM()) {
-            if (this.V() || this.ab()) {
-                f3 = 0.8F;
-                f4 = 0.02F;
-                f3 += (0.54600006F - f3) * 2.5F / 3.0F;
-                f4 += (this.bI() - f4) * 2.5F / 3.0F;
+            if (this.isInWater() || this.isInLava()) {
+                float f = 0.8f + ((0.54600006F - 0.8f) * 5 / 3.0F);
 
-                this.a(f, f1, f4);
-                this.move(this.motX, this.motY, this.motZ);
-                this.motX *= f3;
-                this.motY *= 0.800000011920929D;
-                this.motZ *= f3;
-                this.motY -= 0.02D;
+                this.moveRelative((0.02f + ((this.getSpeed() - 0.02f) * 5 / 3.0F)), vec3d);
+                this.move(MoverType.SELF, this.getDeltaMovement());
 
-                if (this.positionChanged && this.c(this.motX, this.motY + 0.6000000238418579D - this.locY + d0, this.motZ)) {
-                    this.motY = 0.30000001192092896D;
+                vec3d1 = this.getDeltaMovement();
+
+                if (this.horizontalCollision && this.onClimbable()) {
+                    vec3d1 = new Vec3(vec3d1.x, 0.2D, vec3d1.z);
+                }
+
+                this.setDeltaMovement(vec3d1.multiply(f, 0.800000011920929D, f));
+
+                Vec3 vec3d2 = this.getFluidFallingAdjustedMovement(0.08D, this.getDeltaMovement().y <= 0.0D, this.getDeltaMovement());
+
+                this.setDeltaMovement(vec3d2);
+
+                if (this.horizontalCollision && this.isFree(vec3d2.x, vec3d2.y + 0.6000000238418579D - this.getY() + posY, vec3d2.z)) {
+                    this.setDeltaMovement(vec3d2.x, 0.30000001192092896D, vec3d2.z);
                 }
             } else {
-                float f5 = 0.91F;
+                float blockFriction = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction();
+                float friction = this.onGround ? blockFriction * 0.91F : 0.91F;
+                vec3d1 = this.handleRelativeFrictionAndCalculateMovement(vec3d, blockFriction);
+                double vecY = vec3d1.y;
 
-                if (this.onGround) {
-                    f5 = this.world.getType(new BlockPosition(MathHelper.floor(this.locX), MathHelper.floor(this.getBoundingBox().b) - 1, MathHelper.floor(this.locZ))).getBlock().frictionFactor * 0.91F;
-                }
-
-                float f6 = 0.16277136F / (f5 * f5 * f5);
-
-                if (this.onGround) {
-                    f3 = this.bI() * f6;
+                if (this.shouldDiscardFriction()) {
+                    this.setDeltaMovement(vec3d1.x, vecY, vec3d1.z);
                 } else {
-                    f3 = this.aM;
+                    this.setDeltaMovement(vec3d1.x * (double) friction, vecY * 0.9200000190734863D, vec3d1.z * (double) friction);
                 }
-
-                this.a(f, f1, f3);
-
-                f5 = 0.91F;
-
-                if (this.onGround) {
-                    f5 = this.world.getType(new BlockPosition(MathHelper.floor(this.locX), MathHelper.floor(this.getBoundingBox().b) - 1, MathHelper.floor(this.locZ))).getBlock().frictionFactor * 0.91F;
-                }
-
-                if (this.k_()) {
-                    f4 = 0.15F;
-                    this.motX = MathHelper.a(this.motX, -f4, f4);
-                    this.motZ = MathHelper.a(this.motZ, -f4, f4);
-                    this.fallDistance = 0.0F;
-
-                    if (this.motY < -0.015D) {
-                        this.motY = -0.015D;
-                    }
-
-                    boolean flag = this.isSneaking();
-
-                    if (flag && this.motY < 0.0D) {
-                        this.motY = 0.0D;
-                    }
-                }
-
-                this.move(this.motX, this.motY, this.motZ);
-
-                if (this.positionChanged && this.k_()) {
-                    this.motY = 0.2D;
-                }
-
-                if (!this.world.isClientSide || this.world.isLoaded(new BlockPosition((int) this.locX, 0, (int) this.locZ)) && this.world.getChunkAtWorldCoords(new BlockPosition((int) this.locX, 0, (int) this.locZ)).o()) {
-                    this.motY -= 0.008D;
-                } else if (this.locY > 0.0D) {
-                    this.motY = -0.01D;
-                } else {
-                    this.motY = 0.0D;
-                }
-
-                this.motY *= 0.9200000190734863D;
-                this.motX *= f5;
-                this.motZ *= f5;
             }
         }
 
-        this.aA = this.aB;
-        d0 = this.locX - this.lastX;
-        double d1 = this.locZ - this.lastZ;
-        float f2 = MathHelper.sqrt(d0 * d0 + d1 * d1) * 4.0F;
-
-        if (f2 > 1.0F) {
-            f2 = 1.0F;
-        }
-
-        this.aB += (f2 - this.aB) * 0.4F;
-        this.aC += this.aB;
+        this.calculateEntityAnimation(this, false);
     }
 
     @Override
-    public boolean r(Entity entity) {
+    public boolean doHurtTarget(Entity entity) {
         flyingMenacingly = 0;
         hasntMoved = 0;
         calm = 0;
         angry = 0;
 
-        return super.r(entity);
+        return super.doHurtTarget(entity);
     }
 
     @Override
-    public ItemStack bA() {
-        return kbItem;
+    public boolean okTarget(@Nullable LivingEntity entityliving) {
+        return entityliving != null;
     }
 
     @Override
-    public void a(boolean flag) {
+    public void setSecondsOnFire(int i, boolean callEvent) {
     }
 
     @Override
-    public void setOnFire(int i) {
+    public void setRemainingFireTicks(int i) {
     }
 
     @Override
-    public void makeSound(String s, float f, float f1) {
+    public void setCanBreakDoors(boolean flag) {
+        super.setCanBreakDoors(true);
     }
 
     @Override
-    public boolean damageEntity(DamageSource damagesource, float f) {
+    protected boolean supportsBreakDoorGoal() {
+        return true;
+    }
+
+    @Override
+    protected boolean damageEntity0(DamageSource damagesource, float f) {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldDropLoot() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldDropExperience() {
         return false;
     }
 
     public NextbotDisplay getDisplay() {
         return display;
-    }
-
-    private Object getPrivateField(String fieldName, Class clazz, Object object) {
-        try {
-            Field field = clazz.getDeclaredField(fieldName);
-
-            field.setAccessible(true);
-
-            return field.get(object);
-        } catch(NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

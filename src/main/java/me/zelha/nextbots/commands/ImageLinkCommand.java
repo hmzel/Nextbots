@@ -22,14 +22,7 @@ public class ImageLinkCommand extends NextbotCommand {
 
         if (!save(config, args[1], sender)) return true;
 
-        applyToBots(args[1], display -> {
-            while (display.getFrameAmount() != 0) {
-                display.removeFrame(0);
-            }
-
-            display.addImage(args[2]);
-        });
-
+        applyToBots(args[1], display -> display.setImage(args[2]));
         sender.sendMessage("§cSet " + args[1] + "'s image to " + args[2]);
 
         return true;

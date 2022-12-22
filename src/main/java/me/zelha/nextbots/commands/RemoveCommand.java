@@ -4,6 +4,7 @@ import me.zelha.nextbots.Main;
 import me.zelha.nextbots.nextbot.Nextbot;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftChatMessage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class RemoveCommand extends NextbotCommand {
             sender.sendMessage("§cSuccessfully deleted " + args[1]);
 
             for (Nextbot bot : new ArrayList<>(Main.getBots())) {
-                if (!bot.getName().equals(args[1])) continue;
+                if (!CraftChatMessage.fromComponent(bot.getCustomName()).equals(args[1])) continue;
 
                 bot.despawn();
             }

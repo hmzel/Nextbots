@@ -1,6 +1,5 @@
 package me.zelha.nextbots;
 
-import hm.zelha.particlesfx.ParticleSFXMain;
 import me.zelha.nextbots.commands.NextbotCommand;
 import me.zelha.nextbots.nextbot.ChunkUnloadPrevention;
 import me.zelha.nextbots.nextbot.Nextbot;
@@ -19,7 +18,6 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        ParticleSFXMain.setPlugin(this);
         Bukkit.getPluginManager().registerEvents(new ChunkUnloadPrevention(), this);
         getCommand("nextbot").setExecutor(new NextbotCommand());
     }

@@ -55,7 +55,7 @@ public class UnignoreColorCommand extends NextbotCommand {
 
         if (!save(config, args[1], sender)) return true;
 
-        applyToBots(args[1], display -> display.removeIgnoredColor(index));
+        applyToBots(args[1], display -> display.removeIgnoredColor(index - 1));
 
         return true;
     }

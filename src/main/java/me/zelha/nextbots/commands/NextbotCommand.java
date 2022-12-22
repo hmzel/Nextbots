@@ -9,6 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftChatMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,7 +98,7 @@ public class NextbotCommand implements CommandExecutor {
 
     protected void applyToBots(String name, Consumer<NextbotDisplay> consumer) {
         for (Nextbot bot : Main.getBots()) {
-            if (!bot.getName().equals(name)) continue;
+            if (!CraftChatMessage.fromComponent(bot.getCustomName()).equals(name)) continue;
 
             consumer.accept(bot.getDisplay());
         }
