@@ -118,9 +118,11 @@ public class Nextbot extends Zombie {
                     fluidTarget = nmsPlayer;
 
                     setTarget(null);
+                    setNoAi(true);
                 } else {
                     craftAttributes.getAttribute(Attribute.GENERIC_FOLLOW_RANGE).setBaseValue(Math.sqrt(dist));
                     setTarget(nmsPlayer, EntityTargetEvent.TargetReason.CUSTOM, false);
+                    setNoAi(false);
 
                     fluidTarget = null;
                 }
@@ -142,12 +144,15 @@ public class Nextbot extends Zombie {
     public void tick() {
         if (getTarget() != null && (getTarget().isEyeInFluid(FluidTags.WATER) || getTarget().isEyeInFluid(FluidTags.LAVA))) {
             setTarget(null);
+            setNoAi(true);
         }
         
         if (fluidTarget != null && ((!fluidTarget.isEyeInFluid(FluidTags.WATER) && !fluidTarget.isEyeInFluid(FluidTags.LAVA))
            || !fluidTarget.isAlive() || fluidTarget.gameMode.getGameModeForPlayer() == GameType.CREATIVE
            || fluidTarget.gameMode.getGameModeForPlayer() == GameType.SPECTATOR)) {
             fluidTarget = null;
+
+            setNoAi(false);
         }
 
         super.tick();
