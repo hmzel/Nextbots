@@ -57,6 +57,7 @@ public class GroundPathNavigation extends PathNavigation {
     protected PathFinder createPathFinder(int var0) {
         this.nodeEvaluator = new WalkNodeEvaluator();
         this.nodeEvaluator.setCanPassDoors(true);
+        this.nodeEvaluator.setCanOpenDoors(true);
 
         return new PathFinder(this.nodeEvaluator, var0);
     }

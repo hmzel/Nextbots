@@ -67,6 +67,7 @@ public class Nextbot extends Zombie {
         lHelper = display.getCenter().clone();
         bukkitPickUpLoot = false;
 
+        setCanBreakDoors(true);
         goalSelector.getAvailableGoals().clear();
         targetSelector.getAvailableGoals().clear();
         goalSelector.addGoal(0, new FloatGoal(this));
@@ -74,6 +75,10 @@ public class Nextbot extends Zombie {
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0D));
         goalSelector.addGoal(1, new BreakDoorGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, net.minecraft.world.entity.player.Player.class, true, true));
+
+        navigation = new GroundPathNavigation(this, this.level);
+
+        navigation.setCanFloat(true);
         setCustomName(CraftChatMessage.fromStringOrNull(name));
         setPersistenceRequired(true);
         setCanPickUpLoot(false);
@@ -142,6 +147,19 @@ public class Nextbot extends Zombie {
 
     @Override
     public void tick() {
+        for (org.bukkit.entity.Entity bukkitEntity : getLevel().getWorld().getNearbyEntities(lHelper.zero().add(getX(), getY(), getZ()), getBbWidth() + 0.5, getBbHeight() + 0.5, getBbWidth() + 0.5)) {
+            if (!(bukkitEntity instanceof Player)) continue;
+
+            if (((CraftPlayer) bukkitEntity).getHandle().hurt(DamageSource.mobAttack(this), 13131313)) {
+                flyingMenacingly = 0;
+                hasntMoved = 0;
+                calm = 0;
+                angry = 0;
+
+                return;
+            }
+        }
+
         if (getTarget() != null && (getTarget().isEyeInFluid(FluidTags.WATER) || getTarget().isEyeInFluid(FluidTags.LAVA))) {
             setTarget(null);
             setNoAi(true);
@@ -218,19 +236,6 @@ public class Nextbot extends Zombie {
             }
 
             move(MoverType.SELF, new Vec3(motX, motY, motZ));
-
-            for (org.bukkit.entity.Entity bukkitEntity : getLevel().getWorld().getNearbyEntities(lHelper.zero().add(getX(), getY(), getZ()), getBbWidth(), getBbHeight(), getBbWidth())) {
-                if (!(bukkitEntity instanceof Player)) continue;
-
-                if (((CraftPlayer) bukkitEntity).getHandle().hurt(DamageSource.mobAttack(this), 13131313)) {
-                    flyingMenacingly = 0;
-                    hasntMoved = 0;
-                    calm = 0;
-                    angry = 0;
-
-                    return;
-                }
-            }
 
             flyingMenacingly++;
         }
