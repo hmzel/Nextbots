@@ -155,6 +155,8 @@ public class Nextbot extends Zombie {
             setNoAi(false);
         }
 
+        navigation.recomputePath();
+
         super.tick();
         super.tick();
         super.tick();
